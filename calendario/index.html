@@ -29,7 +29,7 @@
   body {
     display: grid;
     place-items: center;
-    padding: 14px 10px 10px;
+    padding: clamp(8px, 4vw, 14px) clamp(3px, 2.5vw, 10px) clamp(4px, 2.5vw, 10px);
     font-family: var(--serif);
     color: var(--ink);
     -webkit-font-smoothing: antialiased;
@@ -97,7 +97,7 @@
   }
   .nav { display: flex; gap: 1.4cqw; }
   .nav button {
-    width: 7cqw; height: 7cqw; min-width: 22px; min-height: 22px;
+    width: 7cqw; height: 7cqw; min-width: 16px; min-height: 16px;
     border-radius: 50%;
     border: 1.5px solid color-mix(in srgb, var(--ink) 55%, transparent);
     background: transparent; color: var(--ink);
@@ -161,7 +161,7 @@
   /* ---------- botão de ajustes ---------- */
   .gear {
     position: absolute; right: 2cqw; bottom: 2cqw;
-    width: 6.5cqw; height: 6.5cqw; min-width: 20px; min-height: 20px;
+    width: 6.5cqw; height: 6.5cqw; min-width: 14px; min-height: 14px;
     border: 0; background: transparent; cursor: pointer;
     color: var(--ink); opacity: .28; transition: opacity .2s;
     display: grid; place-items: center;
