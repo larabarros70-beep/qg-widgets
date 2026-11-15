@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-16 -16 152 152" width="152" height="152">
+<defs><filter id="s" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="1.5" dy="2.5" stdDeviation="2" flood-color="#2E211C" flood-opacity=".22"/></filter></defs>
+<g filter="url(#s)"><g stroke="#FFFDF8" stroke-width="20" stroke-linejoin="round" stroke-linecap="round" fill="#FFFDF8"><circle cx="60" cy="60" r="50" fill="#2E211C"/><circle cx="60" cy="60" r="38" fill="none" stroke="#5a4a42" stroke-width="1.2"/><circle cx="60" cy="60" r="30" fill="none" stroke="#5a4a42" stroke-width="1.2"/><circle cx="60" cy="60" r="18" fill="#54A9C5"/><circle cx="60" cy="60" r="3.5" fill="#FFFDF8"/></g></g>
+<g stroke="#2E211C" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><circle cx="60" cy="60" r="50" fill="#2E211C"/><circle cx="60" cy="60" r="38" fill="none" stroke="#5a4a42" stroke-width="1.2"/><circle cx="60" cy="60" r="30" fill="none" stroke="#5a4a42" stroke-width="1.2"/><circle cx="60" cy="60" r="18" fill="#54A9C5"/><circle cx="60" cy="60" r="3.5" fill="#FFFDF8"/></g>
+</svg>
