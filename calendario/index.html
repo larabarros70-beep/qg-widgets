@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calendário · QG DA LARA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500;1,9..144,600&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     QG DA LARA · Calendário mensal
+     Tudo é configurável pela URL (veja o README). Nada é salvo
+     no navegador, então o widget fica igual no computador e no celular.
+     ============================================================ */
+  :root {
+    --acc: #E5004F;      /* cor principal: hoje, domingo, flor   */
+    --acc-txt: #E5004F;  /* cor principal para texto              */
+    --on-acc: #FFFFFF;   /* texto sobre a cor principal           */
+    --sec: #D9E52B;      /* cor da fita e dos detalhes            */
+    --soft: #F4D9C9;     /* tom suave: fins de semana             */
+    --paper: #F5EBD8;    /* papel                                 */
+    --ink: #2E211C;      /* tinta                                 */
+    --serif: "Fraunces", Georgia, "Times New Roman", serif;
+    --hand: "Caveat", "Segoe Print", "Bradley Hand", cursive;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: transparent; }
+  body {
+    display: grid;
+    place-items: center;
+    padding: 14px 10px 10px;
+    font-family: var(--serif);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  body.fundo-papel { background: var(--paper); }
+
+  /* ---------- cartão ---------- */
+  .card {
+    container-type: inline-size;
+    position: relative;
+    width: 100%;
+    max-width: 380px;
+    padding: 9cqw 6.5cqw 6cqw;
+    border-radius: 3px 5px 4px 6px;
+    background-color: var(--paper);
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .25 0 0 0 0 .15 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+      radial-gradient(120% 90% at 0% 0%, rgba(255,255,255,.55), transparent 60%);
+    box-shadow:
+      0 1px 0 rgba(46,33,28,.06),
+      0 6px 14px -6px rgba(46,33,28,.28),
+      0 18px 30px -18px rgba(46,33,28,.25);
+  }
+
+  /* fita adesiva (washi tape) */
+  .tape {
+    position: absolute;
+    top: -3.2cqw; left: 50%;
+    width: 44cqw; height: 8.4cqw;
+    transform: translateX(-50%) rotate(-3deg);
+    background:
+      repeating-linear-gradient(90deg,
+        color-mix(in srgb, var(--sec) 92%, transparent) 0 3.2cqw,
+        color-mix(in srgb, var(--sec) 62%, white) 3.2cqw 6.4cqw);
+    opacity: .9;
+    clip-path: polygon(0 8%,3% 0,6% 9%,9% 1%,12% 8%,15% 0,18% 7%,21% 1%,24% 9%,27% 0,30% 8%,33% 1%,36% 9%,39% 0,42% 8%,45% 1%,48% 9%,51% 0,54% 8%,57% 1%,60% 9%,63% 0,66% 8%,69% 1%,72% 9%,75% 0,78% 8%,81% 1%,84% 9%,87% 0,90% 8%,93% 1%,96% 9%,100% 2%,100% 94%,97% 100%,94% 91%,91% 99%,88% 92%,85% 100%,82% 91%,79% 99%,76% 92%,73% 100%,70% 91%,67% 99%,64% 92%,61% 100%,58% 91%,55% 99%,52% 92%,49% 100%,46% 91%,43% 99%,40% 92%,37% 100%,34% 91%,31% 99%,28% 92%,25% 100%,22% 91%,19% 99%,16% 92%,13% 100%,10% 91%,7% 99%,4% 92%,0 98%);
+    display: grid; place-items: center;
+    font-family: var(--hand); font-weight: 700;
+    font-size: 4.6cqw; line-height: 1; color: var(--ink);
+    white-space: nowrap; overflow: hidden; padding: 0 3cqw;
+  }
+
+  /* desenhos decorativos */
+  .deco { position: absolute; pointer-events: none; }
+  .deco svg { display: block; width: 100%; height: 100%; }
+  .deco-main { top: 2.5cqw; right: 3cqw; width: 15cqw; height: 15cqw; transform: rotate(14deg); }
+  .deco-mini { top: 3cqw; left: 4cqw; width: 6cqw; height: 6cqw; transform: rotate(-12deg); opacity: .9; }
+
+  /* ---------- cabeçalho ---------- */
+  .head {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 2cqw; margin-bottom: 4cqw; padding-right: 13cqw;
+  }
+  .title { display: flex; align-items: baseline; gap: 2cqw; min-width: 0; cursor: pointer; }
+  .month {
+    font-style: italic; font-weight: 600;
+    font-size: 11.5cqw; line-height: .95; letter-spacing: -.02em;
+    font-variation-settings: "opsz" 144;
+    white-space: nowrap;
+  }
+  .year {
+    font-family: var(--hand); font-weight: 700;
+    font-size: 7cqw; line-height: 1; color: var(--acc-txt);
+    transform: rotate(-4deg) translateY(-.4cqw);
+  }
+  .nav { display: flex; gap: 1.4cqw; }
+  .nav button {
+    width: 7cqw; height: 7cqw; min-width: 22px; min-height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid color-mix(in srgb, var(--ink) 55%, transparent);
+    background: transparent; color: var(--ink);
+    font-family: var(--serif); font-size: 4.2cqw; line-height: 1;
+    cursor: pointer; display: grid; place-items: center;
+    transition: background .15s, color .15s, transform .15s;
+  }
+  .nav button:hover { background: var(--ink); color: var(--paper); transform: rotate(-6deg); }
+  .nav button:focus-visible, .title:focus-visible, .gear:focus-visible { outline: 2px dashed var(--acc); outline-offset: 2px; }
+
+  /* ---------- grade ---------- */
+  .rule {
+    height: 0; border-top: 1.5px dashed color-mix(in srgb, var(--ink) 30%, transparent);
+    margin: 0 0 2.4cqw;
+  }
+  .grid {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    row-gap: 1.2cqw; text-align: center;
+  }
+  .wd {
+    font-size: 3.6cqw; font-weight: 600; letter-spacing: .12em;
+    text-transform: uppercase; padding-bottom: 1.6cqw;
+    color: color-mix(in srgb, var(--ink) 65%, transparent);
+  }
+  .wd.sun { color: var(--acc-txt); }
+  .day {
+    position: relative; aspect-ratio: 1 / .86;
+    display: grid; place-items: center;
+    font-size: 4.6cqw; font-variant-numeric: lining-nums tabular-nums;
+  }
+  .day.wknd::before {
+    content: ""; position: absolute; inset: 6% 5%;
+    background: color-mix(in srgb, var(--soft) 70%, transparent);
+    border-radius: 2px; z-index: 0;
+  }
+  .day span { position: relative; z-index: 1; }
+  .day.sun span { color: var(--acc-txt); }
+  .day.out { opacity: .28; }
+  .day.today::after {
+    content: ""; position: absolute; z-index: 0;
+    width: 8.6cqw; height: 8.6cqw;
+    background: var(--acc);
+    border-radius: 52% 46% 55% 44% / 48% 55% 45% 52%;
+    transform: rotate(-8deg);
+    box-shadow: 1px 1.5px 0 color-mix(in srgb, var(--ink) 35%, transparent);
+  }
+  .day.today span { color: var(--on-acc); font-weight: 600; }
+
+  .bottom { display: flex; align-items: center; justify-content: space-between; gap: 2cqw; margin-top: 3cqw; padding-right: 6cqw; }
+  .foot {
+    text-align: right;
+    font-family: var(--hand); font-size: 4.6cqw; line-height: 1;
+    color: color-mix(in srgb, var(--ink) 70%, transparent);
+  }
+  .foot b { color: var(--acc-txt); font-weight: 700; }
+
+  .flip { animation: flip .32s ease; }
+  @keyframes flip { from { opacity: 0; transform: translateY(4px) rotate(-.4deg); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .flip { animation: none; } .nav button:hover { transform: none; } }
+
+  /* ---------- botão de ajustes ---------- */
+  .gear {
+    position: absolute; right: 2cqw; bottom: 2cqw;
+    width: 6.5cqw; height: 6.5cqw; min-width: 20px; min-height: 20px;
+    border: 0; background: transparent; cursor: pointer;
+    color: var(--ink); opacity: .28; transition: opacity .2s;
+    display: grid; place-items: center;
+  }
+  .card:hover .gear, .gear:focus-visible { opacity: .75; }
+  .gear svg { width: 100%; height: 100%; }
+  body.limpo .gear { display: none; }
+
+  /* ---------- painel de personalização ---------- */
+  .panel {
+    position: absolute; inset: 0; z-index: 5;
+    background: var(--paper); border-radius: inherit;
+    padding: 6cqw; overflow-y: auto;
+    display: none; font-size: 3.8cqw;
+  }
+  .panel.open { display: block; }
+  .panel h2 { font-style: italic; font-weight: 600; font-size: 6.4cqw; margin-bottom: 3cqw; }
+  .panel .row { margin-bottom: 3.4cqw; }
+  .panel .lbl { font-family: var(--hand); font-weight: 700; font-size: 5cqw; display: block; margin-bottom: 1.2cqw; }
+  .chips { display: flex; flex-wrap: wrap; gap: 1.6cqw; }
+  .chip {
+    border: 1.5px solid color-mix(in srgb, var(--ink) 40%, transparent);
+    background: transparent; color: var(--ink);
+    border-radius: 99px; padding: 1cqw 2.6cqw;
+    font: inherit; font-size: 3.6cqw; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 1.2cqw;
+  }
+  .chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .dot { width: 3.4cqw; height: 3.4cqw; border-radius: 50%; display: inline-block; box-shadow: inset 0 0 0 1px rgba(0,0,0,.15); }
+  .panel input[type="text"] {
+    width: 100%; font: inherit; font-size: 3.8cqw; color: var(--ink);
+    background: rgba(255,255,255,.55);
+    border: 1.5px solid color-mix(in srgb, var(--ink) 35%, transparent);
+    border-radius: 4px; padding: 1.6cqw 2cqw;
+  }
+  .panel .link { font-size: 3cqw; }
+  .actions { display: flex; gap: 2cqw; margin-top: 2cqw; }
+  .btn {
+    flex: 1; border: 0; border-radius: 4px; padding: 2.2cqw;
+    font: inherit; font-weight: 600; font-size: 3.8cqw; cursor: pointer;
+    background: var(--acc); color: var(--on-acc);
+  }
+  .btn.ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--ink); }
+  .hint { font-size: 3.2cqw; opacity: .7; margin-top: 1.6cqw; line-height: 1.35; }
+</style>
+</head>
+<body>
+
+<main class="card" id="card" aria-label="Calendário do mês">
+  <div class="tape" id="tape" aria-hidden="true"></div>
+  <div class="deco deco-main" id="decoMain" aria-hidden="true"></div>
+  <div class="deco deco-mini" id="decoMini" aria-hidden="true"></div>
+
+  <header class="head">
+    <div class="title" id="title" role="button" tabindex="0" title="Voltar para hoje">
+      <h1 class="month" id="month"></h1>
+      <span class="year" id="year"></span>
+    </div>
+  </header>
+  <div class="rule"></div>
+  <div class="grid" id="grid" role="grid" aria-live="polite"></div>
+  <div class="bottom">
+    <nav class="nav" aria-label="Trocar de mês">
+      <button id="prev" type="button" aria-label="Mês anterior">‹</button>
+      <button id="next" type="button" aria-label="Próximo mês">›</button>
+    </nav>
+    <p class="foot" id="foot"></p>
+  </div>
+
+  <button class="gear" id="gear" type="button" aria-label="Personalizar calendário" title="Personalizar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 4.5l4 4L8 20H4v-4L15.5 4.5z"/><path d="M13.5 6.5l4 4"/></svg>
+  </button>
+
+  <section class="panel" id="panel" aria-label="Personalizar">
+    <h2>personalizar</h2>
+    <div class="row"><span class="lbl">cor</span><div class="chips" id="optTema"></div></div>
+    <div class="row"><span class="lbl">papel</span><div class="chips" id="optPapel"></div></div>
+    <div class="row"><span class="lbl">desenho</span><div class="chips" id="optDeco"></div></div>
+    <div class="row"><span class="lbl">semana começa</span><div class="chips" id="optInicio"></div></div>
+    <div class="row"><span class="lbl">texto na fita</span>
+      <input type="text" id="optTitulo" maxlength="24" placeholder="ex.: meu mês ✿">
+    </div>
+    <div class="row"><span class="lbl">link para colar no Notion</span>
+      <input type="text" id="optLink" class="link" readonly>
+      <div class="actions">
+        <button class="btn" id="copy" type="button">copiar link</button>
+        <button class="btn ghost" id="close" type="button">fechar</button>
+      </div>
+      <p class="hint" id="copyHint">Copie o link e, no Notion, troque o link do embed por ele (⋯ → Replace / Substituir).</p>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  // ---------------- temas (só cores da paleta do QG) ----------------
+  const TEMAS = {
+    rosa:     { nome: "rosa",     acc: "#E5004F", txt: "#E5004F", on: "#FFFFFF", sec: "#D9E52B", soft: "#F4D9C9" },
+    lavanda:  { nome: "lavanda",  acc: "#8D65B5", txt: "#8D65B5", on: "#FFFFFF", sec: "#F2D75C", soft: "#E7DDF0" },
+    verde:    { nome: "verde",    acc: "#328D78", txt: "#328D78", on: "#FFFFFF", sec: "#F28B35", soft: "#D8EAE3" },
+    laranja:  { nome: "laranja",  acc: "#F28B35", txt: "#C8641A", on: "#2E211C", sec: "#54A9C5", soft: "#FBE2CC" },
+    vermelho: { nome: "vermelho", acc: "#F04432", txt: "#F04432", on: "#FFFFFF", sec: "#F2D75C", soft: "#F9D7CF" },
+    azul:     { nome: "azul",     acc: "#54A9C5", txt: "#2F7F99", on: "#FFFFFF", sec: "#E5004F", soft: "#D9EDF3" },
+    limao:    { nome: "limão",    acc: "#D9E52B", txt: "#8D65B5", on: "#2E211C", sec: "#8D65B5", soft: "#EEF2BF" }
+  };
+  const PAPEIS = { creme: "#F5EBD8", rosa: "#F4D9C9", branco: "#FFFCF6" };
+
+  const DESENHOS = {
+    flor: (a, s) => `<svg viewBox="0 0 100 100"><g fill="${a}" stroke="#2E211C" stroke-width="2.2">${
+        [0,72,144,216,288].map(r => `<ellipse cx="50" cy="26" rx="14" ry="21" transform="rotate(${r} 50 50)"/>`).join("")
+      }</g><circle cx="50" cy="50" r="12" fill="${s}" stroke="#2E211C" stroke-width="2.2"/></svg>`,
+    estrela: (a) => `<svg viewBox="0 0 100 100"><path d="M50 4C54 38 62 46 96 50C62 54 54 62 50 96C46 62 38 54 4 50C38 46 46 38 50 4Z" fill="${a}" stroke="#2E211C" stroke-width="2.2" stroke-linejoin="round"/></svg>`,
+    coracao: (a) => `<svg viewBox="0 0 100 100"><path d="M50 88C20 66 7 48 7 33C7 19 18 9 31 9C40 9 46 14 50 22C54 14 60 9 69 9C82 9 93 19 93 33C93 48 80 66 50 88Z" fill="${a}" stroke="#2E211C" stroke-width="2.2" stroke-linejoin="round"/></svg>`,
+    nenhum: () => ""
+  };
+  const MINI = (c) => `<svg viewBox="0 0 100 100"><path d="M50 6C53 40 60 47 94 50C60 53 53 60 50 94C47 60 40 53 6 50C40 47 47 40 50 6Z" fill="${c}"/></svg>`;
+
+  // ---------------- configuração pela URL ----------------
+  const qs = new URLSearchParams(location.search);
+  const pick = (v, list, def) => (v && list.includes(v) ? v : def);
+  const cfg = {
+    tema:   pick((qs.get("tema") || "").toLowerCase(), Object.keys(TEMAS), "rosa"),
+    papel:  pick((qs.get("papel") || "").toLowerCase(), Object.keys(PAPEIS), "creme"),
+    deco:   pick((qs.get("deco") || "").toLowerCase(), Object.keys(DESENHOS), "flor"),
+    inicio: pick((qs.get("inicio") || "").toLowerCase(), ["dom", "seg"], "dom"),
+    titulo: (qs.get("titulo") || "").slice(0, 24),
+    cor:    /^[0-9a-f]{6}$/i.test(qs.get("cor") || "") ? "#" + qs.get("cor") : "",
+    fundo:  pick((qs.get("fundo") || "").toLowerCase(), ["transparente", "papel"], "transparente"),
+    limpo:  qs.get("limpo") === "1"
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const root = document.documentElement.style;
+
+  function aplicarVisual() {
+    const t = TEMAS[cfg.tema];
+    const acc = cfg.cor || t.acc;
+    root.setProperty("--acc", acc);
+    root.setProperty("--acc-txt", cfg.cor || t.txt);
+    root.setProperty("--on-acc", t.on);
+    root.setProperty("--sec", t.sec);
+    root.setProperty("--soft", t.soft);
+    root.setProperty("--paper", PAPEIS[cfg.papel]);
+    document.body.classList.toggle("fundo-papel", cfg.fundo === "papel");
+    document.body.classList.toggle("limpo", cfg.limpo);
+    $("decoMain").innerHTML = DESENHOS[cfg.deco](acc, t.sec);
+    $("decoMini").innerHTML = cfg.deco === "nenhum" ? "" : MINI(t.sec);
+    $("tape").textContent = cfg.titulo;
+  }
+
+  // ---------------- calendário ----------------
+  const fmtMes = new Intl.DateTimeFormat("pt-BR", { month: "long" });
+  const fmtLongo = new Intl.DateTimeFormat("pt-BR", { weekday: "long", day: "numeric", month: "long" });
+  const LETRAS = ["D", "S", "T", "Q", "Q", "S", "S"];          // domingo → sábado
+  const NOMES  = ["domingo","segunda","terça","quarta","quinta","sexta","sábado"];
+
+  let hoje = new Date();
+  let vista = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+
+  const mesmoDia = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+  function render(animar) {
+    hoje = new Date();
+    const ano = vista.getFullYear(), mes = vista.getMonth();
+    const inicio = cfg.inicio === "seg" ? 1 : 0;
+
+    $("month").textContent = cap(fmtMes.format(vista));
+    $("year").textContent = ano;
+
+    const grid = $("grid");
+    grid.innerHTML = "";
+
+    for (let i = 0; i < 7; i++) {
+      const wd = (i + inicio) % 7;
+      const el = document.createElement("div");
+      el.className = "wd" + (wd === 0 ? " sun" : "");
+      el.textContent = LETRAS[wd];
+      el.setAttribute("role", "columnheader");
+      el.setAttribute("aria-label", NOMES[wd]);
+      grid.appendChild(el);
+    }
+
+    const primeiro = new Date(ano, mes, 1);
+    const offset = (primeiro.getDay() - inicio + 7) % 7;
+    const diasNoMes = new Date(ano, mes + 1, 0).getDate();
+    const total = Math.ceil((offset + diasNoMes) / 7) * 7;
+
+    for (let i = 0; i < total; i++) {
+      const d = new Date(ano, mes, 1 - offset + i);
+      const el = document.createElement("div");
+      const wd = d.getDay();
+      const cls = ["day"];
+      if (d.getMonth() !== mes) cls.push("out");
+      if (wd === 0 || wd === 6) cls.push("wknd");
+      if (wd === 0) cls.push("sun");
+      if (mesmoDia(d, hoje)) { cls.push("today"); el.setAttribute("aria-current", "date"); }
+      el.className = cls.join(" ");
+      el.setAttribute("role", "gridcell");
+      el.setAttribute("aria-label", fmtLongo.format(d));
+      el.innerHTML = `<span>${d.getDate()}</span>`;
+      grid.appendChild(el);
+    }
+
+    const noMesAtual = ano === hoje.getFullYear() && mes === hoje.getMonth();
+    $("foot").innerHTML = noMesAtual
+      ? `hoje é <b>${fmtLongo.format(hoje)}</b>`
+      : `<span style="cursor:pointer" id="goToday">voltar para <b>hoje</b> ↩</span>`;
+    const back = $("goToday");
+    if (back) back.onclick = irParaHoje;
+
+    if (animar) { grid.classList.remove("flip"); void grid.offsetWidth; grid.classList.add("flip"); }
+  }
+
+  function mudar(delta) { vista = new Date(vista.getFullYear(), vista.getMonth() + delta, 1); render(true); }
+  function irParaHoje() { const h = new Date(); vista = new Date(h.getFullYear(), h.getMonth(), 1); render(true); }
+
+  // vira o dia sozinho à meia-noite (e quando a aba volta a ficar visível)
+  function agendarMeiaNoite() {
+    const agora = new Date();
+    const amanha = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() + 1, 0, 0, 5);
+    setTimeout(() => {
+      const eraMesAtual = vista.getFullYear() === hoje.getFullYear() && vista.getMonth() === hoje.getMonth();
+      if (eraMesAtual) { const h = new Date(); vista = new Date(h.getFullYear(), h.getMonth(), 1); }
+      render(false); agendarMeiaNoite();
+    }, amanha - agora);
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && !mesmoDia(hoje, new Date())) irParaHoje();
+  });
+
+  $("prev").onclick = () => mudar(-1);
+  $("next").onclick = () => mudar(1);
+  $("title").onclick = irParaHoje;
+  $("title").onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); irParaHoje(); } };
+  document.addEventListener("keydown", (e) => {
+    if ($("panel").classList.contains("open")) { if (e.key === "Escape") fecharPainel(); return; }
+    if (e.key === "ArrowLeft") mudar(-1);
+    if (e.key === "ArrowRight") mudar(1);
+  });
+
+  // ---------------- painel de personalização ----------------
+  function linkAtual() {
+    const p = new URLSearchParams();
+    if (cfg.tema !== "rosa") p.set("tema", cfg.tema);
+    if (cfg.papel !== "creme") p.set("papel", cfg.papel);
+    if (cfg.deco !== "flor") p.set("deco", cfg.deco);
+    if (cfg.inicio !== "dom") p.set("inicio", cfg.inicio);
+    if (cfg.titulo) p.set("titulo", cfg.titulo);
+    if (cfg.cor) p.set("cor", cfg.cor.slice(1));
+    if (cfg.fundo !== "transparente") p.set("fundo", cfg.fundo);
+    const q = p.toString();
+    return location.origin + location.pathname + (q ? "?" + q : "");
+  }
+
+  function chips(alvo, opcoes, chave, rotulo, extra) {
+    const box = $(alvo); box.innerHTML = "";
+    opcoes.forEach((v) => {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "chip";
+      b.setAttribute("aria-pressed", String(cfg[chave] === v));
+      b.innerHTML = (extra ? extra(v) : "") + rotulo(v);
+      b.onclick = () => { cfg[chave] = v; if (chave === "tema") cfg.cor = ""; atualizar(); };
+      box.appendChild(b);
+    });
+  }
+
+  function montarPainel() {
+    chips("optTema", Object.keys(TEMAS), "tema", (v) => TEMAS[v].nome,
+      (v) => `<i class="dot" style="background:${TEMAS[v].acc}"></i>`);
+    chips("optPapel", Object.keys(PAPEIS), "papel", (v) => v,
+      (v) => `<i class="dot" style="background:${PAPEIS[v]}"></i>`);
+    chips("optDeco", Object.keys(DESENHOS), "deco", (v) => ({ flor: "flor", estrela: "estrela", coracao: "coração", nenhum: "nenhum" }[v]));
+    chips("optInicio", ["dom", "seg"], "inicio", (v) => (v === "dom" ? "domingo" : "segunda"));
+    $("optTitulo").value = cfg.titulo;
+    $("optLink").value = linkAtual();
+  }
+
+  function atualizar() {
+    aplicarVisual(); render(false); montarPainel();
+    try { history.replaceState(null, "", linkAtual()); } catch (_) {}
+  }
+  function abrirPainel() { montarPainel(); $("panel").classList.add("open"); }
+  function fecharPainel() { $("panel").classList.remove("open"); $("gear").focus(); }
+
+  $("gear").onclick = abrirPainel;
+  $("close").onclick = fecharPainel;
+  $("optTitulo").oninput = (e) => { cfg.titulo = e.target.value.slice(0, 24); atualizar(); };
+  $("copy").onclick = async () => {
+    const campo = $("optLink"); const txt = campo.value;
+    try { await navigator.clipboard.writeText(txt); $("copyHint").textContent = "Link copiado! Agora troque o link do embed no Notion."; }
+    catch (_) { campo.focus(); campo.select(); $("copyHint").textContent = "O Notion bloqueou a cópia automática: o link está selecionado, use Ctrl+C (ou Cmd+C)."; }
+  };
+
+  // ---------------- início ----------------
+  aplicarVisual();
+  render(false);
+  agendarMeiaNoite();
+})();
+</script>
+</body>
+</html>
